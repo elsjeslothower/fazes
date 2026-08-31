@@ -72,6 +72,33 @@ npm run preview   # Serve the dist/ build locally, close to production behavior
 npm run icons     # Regenerate the placeholder PNG icons in public/icons/
 ```
 
+## Deployment
+
+Hosted on Vercel at `fazes.elsje.codes` (a subdomain, not the root domain —
+keeps elsje.codes free for other things). It's a static Vite build with no
+server component of its own, since Supabase is the entire backend, so any
+static host would work — Vercel was chosen for the one-click GitHub
+integration.
+
+Setup, for reference (already done, but here's what it took):
+1. Import the `elsjeslothower/fazes` GitHub repo as a Vercel project — it
+   auto-detects the Vite build command/output directory.
+2. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the project's
+   environment variables (same values as `.env.local`) — Vite bakes these in
+   at build time, so they must be set before a deploy picks them up.
+3. Add `fazes.elsje.codes` as a domain in the project's settings, and add the
+   DNS record Vercel provides at the registrar. HTTPS is provisioned
+   automatically once DNS verifies.
+4. In Supabase → Authentication → URL Configuration, set **Site URL** to
+   `https://fazes.elsje.codes` and add it to **Redirect URLs** — otherwise
+   sign-up confirmation email links point at `localhost` instead of the real
+   domain.
+
+Every push to `main` redeploys automatically. This also doubles as a
+permanent, real-HTTPS way to test on an actual iPhone/iPad without the
+tunnel setup described below — just open `https://fazes.elsje.codes` directly
+in Safari.
+
 ## How the service worker works
 
 `vite-plugin-pwa` is configured with the **injectManifest** strategy: our own
@@ -225,8 +252,17 @@ yet:
   plugins exist but their menstrual-cycle-specific coverage has historically
   been inconsistent — check the current state of the plugin ecosystem when
   this is actually prioritized rather than assuming one will just work.
-- **Location-based in-season food suggestions.** Unlike the other two, this
-  doesn't need native wrapping — iOS Safari has supported the browser's
+- **iOS Home Screen widgets** (today's phase + suggestion at a glance,
+  without opening the app). Also native-only — WidgetKit has no web
+  equivalent, so this is gated on the Capacitor step same as Watch/Health.
+  Needs a small SwiftUI widget extension target in the Xcode project, plus a
+  way to get cycle-phase data to it: widgets run in their own process and
+  can't call into the web app directly, so the usual approach is sharing data
+  through an App Group (e.g. writing the current phase out via shared
+  UserDefaults/a shared file whenever the main app computes it) rather than
+  reimplementing the phase logic natively.
+- **Location-based in-season food suggestions.** Unlike the others above,
+  this doesn't need native wrapping — iOS Safari has supported the browser's
   Geolocation API for years, so it can be built directly into the PWA.
   Two decisions to make at implementation time rather than now: (1) precise
   GPS needs reverse-geocoding to a region, which means a geocoding API/key —
