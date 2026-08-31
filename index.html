@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Fazes</title>
+
+  <!-- viewport-fit=cover lets us pad around the iPhone notch / home indicator with env(safe-area-inset-*) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Fazes — workout and food suggestions matched to your cycle phase." />
+
+  <!-- Standard PWA manifest (covers Android/Chrome/Edge and modern iOS) -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#e5859c" />
+
+  <!--
+    iOS/iPadOS still leans on these legacy Apple meta tags for home-screen behavior.
+    Keep them alongside the manifest — Safari's manifest support is decent but not complete.
+  -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Fazes" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+  <link rel="icon" href="/icons/icon-192.png" type="image/png" />
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- iOS has no native install prompt API, so we show our own banner with instructions -->
+  <div id="ios-install-banner" class="ios-install-banner" hidden>
+    <p>Install this app: tap <strong>Share</strong> ⬆️, then <strong>Add to Home Screen</strong>.</p>
+    <button id="ios-install-dismiss" aria-label="Dismiss">✕</button>
+  </div>
+
+  <div id="update-toast" class="update-toast" hidden>
+    <span>A new version is available.</span>
+    <button id="update-reload">Reload</button>
+  </div>
+
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
