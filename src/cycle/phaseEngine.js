@@ -98,6 +98,38 @@ export function phaseForDay(cycleDay, settings) {
 }
 
 /**
+ * The four phases as contiguous day ranges over a full cycle — used to draw
+ * a segmented progress bar and to figure out how many days remain in the
+ * current phase.
+ */
+export function phaseSegments(settings) {
+  const { menstrualEnd, follicularEnd, ovulatoryEnd } = phaseBuckets(settings);
+
+  return [
+    { phase: 'menstrual', startDay: 1, endDay: menstrualEnd },
+    { phase: 'follicular', startDay: menstrualEnd + 1, endDay: follicularEnd },
+    { phase: 'ovulatory', startDay: follicularEnd + 1, endDay: ovulatoryEnd },
+    { phase: 'luteal', startDay: ovulatoryEnd + 1, endDay: settings.avgCycleLength },
+  ];
+}
+
+/**
+ * How many days remain in the current phase, and which phase comes next
+ * (wrapping back to menstrual for luteal).
+ */
+export function nextPhaseInfo(cycleDay, settings) {
+  const segments = phaseSegments(settings);
+  const currentIndex = segments.findIndex((s) => cycleDay >= s.startDay && cycleDay <= s.endDay);
+  const current = segments[currentIndex];
+  const next = segments[(currentIndex + 1) % segments.length];
+
+  return {
+    daysUntilNextPhase: current.endDay - cycleDay + 1,
+    nextPhase: next.phase,
+  };
+}
+
+/**
  * Given logged cycle history and a reference date (defaults to today),
  * returns where the user currently is in their cycle. Returns
  * `{ hasData: false }` if there's no logged period to count from yet —
@@ -120,6 +152,7 @@ export function getCycleStatus({ cycles, settings = DEFAULT_SETTINGS, referenceD
   const cycleDay = (daysSinceStart % effectiveSettings.avgCycleLength) + 1;
   const phase = phaseForDay(cycleDay, effectiveSettings);
   const daysUntilNextPeriod = effectiveSettings.avgCycleLength - cycleDay + 1;
+  const { daysUntilNextPhase, nextPhase } = nextPhaseInfo(cycleDay, effectiveSettings);
 
   const predictedNextStart = new Date(lastPeriodStart);
   predictedNextStart.setUTCDate(predictedNextStart.getUTCDate() + effectiveSettings.avgCycleLength);
@@ -129,6 +162,8 @@ export function getCycleStatus({ cycles, settings = DEFAULT_SETTINGS, referenceD
     cycleDay,
     phase,
     daysUntilNextPeriod,
+    daysUntilNextPhase,
+    nextPhase,
     predictedNextStart: formatDateOnly(predictedNextStart),
     settings: effectiveSettings,
   };

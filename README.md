@@ -190,6 +190,56 @@ square with a white circle, no external image tools required. Regenerate with
 `npm run icons`. Swap in real branded icons when you have them — a
 maskable-safe 512×512 via [maskable.app](https://maskable.app/editor).
 
+## Next steps
+
+Open items to come back to — not urgent, just tracked so they don't get lost:
+
+- **Confirm the "new version available" toast behaves correctly.** A race
+  in [`src/pwa/sw-register.js`](src/pwa/sw-register.js) could make it fire on
+  a genuine first install (our `sw.js` calls `self.clients.claim()` in
+  `activate`, which could flip `navigator.serviceWorker.controller` before
+  the update-check callback read it) — this has been fixed by capturing that
+  flag *before* calling `register()` instead of re-checking it live. Still
+  needs a clean confirmation: in DevTools → Application → Service Workers,
+  find the entry whose **Scope** matches the app's actual URL (e.g.
+  `http://localhost:4173/`, not an unrelated extension's
+  `chrome-extension://...` entry — that panel lists registrations across all
+  origins, not just the current page's) and confirm only one registration
+  exists with no unexpected prior version before a fresh load.
+- **Data export and account/data deletion** aren't built yet — see the "Data
+  privacy notes" section above for why this one's worth prioritizing before
+  real users.
+
+## Future feature ideas (not started)
+
+Bigger, longer-horizon ideas — noted for context now, not planned in detail
+yet:
+
+- **Apple Watch / Fitness / Health integration.** This has no web API at all
+  — HealthKit is only reachable from a native app, so this depends on the
+  Capacitor step below actually happening, not just being an option. Worth
+  knowing when it's time: HealthKit has purpose-built types for exactly this
+  domain — `HKCategoryTypeIdentifier.menstrualFlow` (and related cycle-tracking
+  sample types, iOS 13+) for period data, and `HKWorkout` for pulling in
+  actual completed workouts from Apple Watch. Community Capacitor HealthKit
+  plugins exist but their menstrual-cycle-specific coverage has historically
+  been inconsistent — check the current state of the plugin ecosystem when
+  this is actually prioritized rather than assuming one will just work.
+- **Location-based in-season food suggestions.** Unlike the other two, this
+  doesn't need native wrapping — iOS Safari has supported the browser's
+  Geolocation API for years, so it can be built directly into the PWA.
+  Two decisions to make at implementation time rather than now: (1) precise
+  GPS needs reverse-geocoding to a region, which means a geocoding API/key —
+  a coarser one-time "what country/hemisphere are you in" ask avoids that
+  entirely and is likely enough precision for "in-season," and (2) the
+  seasonal-produce data itself is slow-changing, so a small curated static
+  dataset (same pattern as `phaseContent.js`) is probably a better fit than
+  taking on a live third-party API dependency for it.
+- **Real Xcode app / App Store submission.** Same step as "wrapping this as a
+  native iOS app" below — restating it here because Health/Watch integration
+  turns it from optional-later into a hard prerequisite, since there's no way
+  to reach HealthKit from the web.
+
 ## Later: wrapping this as a native iOS app (Capacitor)
 
 Nothing to do now — the biggest Capacitor-migration foot-gun is scattering

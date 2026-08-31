@@ -15,6 +15,14 @@ export function registerServiceWorker({ onUpdateAvailable } = {}) {
   }
 
   window.addEventListener('load', async () => {
+    // Captured before registering, not re-read later: our sw.js calls
+    // self.clients.claim() in its 'activate' handler, and since a first-ever
+    // install has nothing to clean up, activation (and the claim) can happen
+    // fast enough to land before the statechange callback below runs — which
+    // would make a live check of navigator.serviceWorker.controller flip true
+    // during a genuine first install, falsely reporting it as an update.
+    const hadExistingController = !!navigator.serviceWorker.controller;
+
     try {
       const registration = await navigator.serviceWorker.register('/sw.js', { type: 'module' });
 
@@ -23,7 +31,7 @@ export function registerServiceWorker({ onUpdateAvailable } = {}) {
         if (!installing) return;
 
         installing.addEventListener('statechange', () => {
-          if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+          if (installing.state === 'installed' && hadExistingController) {
             onUpdateAvailable?.(registration);
           }
         });
