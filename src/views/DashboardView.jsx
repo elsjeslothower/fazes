@@ -40,7 +40,7 @@ export function DashboardView() {
     <div class="dashboard-view">
       <header class="dashboard-header">
         <PhaseBadge phase={status.phase} size="large" />
-        <p class="cycle-day">Day {status.cycleDay} of your cycle{activeCycle ? ' · on your period' : ''}</p>
+        <p class="cycle-day">Day {status.cycleDay} of your cycle · {content.eyebrow}</p>
       </header>
 
       <PhaseProgressBar cycleDay={status.cycleDay} settings={status.settings} />
