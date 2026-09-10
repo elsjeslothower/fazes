@@ -150,6 +150,11 @@ h1, h2, h3 {
   padding-top: 2rem;
 }
 
+.auth-view {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
 .auth-subtitle {
   color: var(--muted);
   margin-top: 0;
