@@ -9,6 +9,7 @@ import { LogView } from './views/LogView.jsx';
 import { PhaseGuideView } from './views/PhaseGuideView.jsx';
 import { SettingsView } from './views/SettingsView.jsx';
 import { NavBar } from './components/NavBar.jsx';
+import { LoadingIndicator } from './components/LoadingIndicator.jsx';
 
 const ROUTES = {
   '/dashboard': DashboardView,
@@ -34,7 +35,7 @@ export function App() {
     if (session && !ROUTES[route]) navigate('/dashboard');
   }, [session, route]);
 
-  if (sessionLoading) return <p class="loading">Loading…</p>;
+  if (sessionLoading) return <LoadingIndicator />;
   if (!session) return <AuthView />;
 
   const View = ROUTES[route];

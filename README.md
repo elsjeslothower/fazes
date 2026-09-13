@@ -23,11 +23,11 @@ src/
   sw.js                         Service worker source (see "How the service worker works" below)
   state/                        session.js (auth state), cycleStore.js (cycles + profile)
   auth/                         supabaseClient.js, auth.js
-  data/                         cyclesRepo.js, profileRepo.js, localCache.js
-  cycle/phaseEngine.js           Pure cycle-phase calculation logic
-  content/phaseContent.js        Static workout/food suggestion copy per phase
-  views/                         AuthView, OnboardingView, DashboardView, LogView, PhaseGuideView, SettingsView
-  components/                    NavBar, PhaseBadge
+  data/                         cyclesRepo.js, profileRepo.js, dailyLogsRepo.js, localCache.js
+  cycle/                        phaseEngine.js (phase math), temperature.js (unit conversion)
+  content/                      phaseContent.js, symptoms.js — static copy/option lists
+  views/                        AuthView, OnboardingView, DashboardView, LogView, PhaseGuideView, SettingsView
+  components/                   NavBar, PhaseBadge, PhaseProgressBar, DayLogForm
   pwa/                           sw-register.js, ios-install-banner.js, install-prompt.js
 public/
   manifest.json, icons/, offline.html   copied verbatim into the build
@@ -48,9 +48,12 @@ scripts/generate-icons.js        Regenerates the placeholder icons
      explicit given the data is sensitive; `schema.sql` already includes the
      `grant` statements this requires).
    - In the project's SQL editor, run the contents of
-     [`supabase/schema.sql`](supabase/schema.sql) — this creates the `profiles`
-     and `cycles` tables with Row Level Security enabled, so each user can only
-     ever read or write their own rows.
+     [`supabase/schema.sql`](supabase/schema.sql) — this creates the `profiles`,
+     `cycles`, and `daily_logs` tables with Row Level Security enabled, so
+     each user can only ever read or write their own rows. The whole file is
+     safe to re-run in full any time it changes (every statement in it is
+     idempotent) — if you set up your project before `daily_logs` or the
+     `temperature_unit` column existed, re-running it picks those up.
 3. **Copy env config:**
    ```bash
    cp .env.example .env.local
@@ -197,8 +200,10 @@ install → relaunch → offline → update cycle end to end.
 Cycle data is sensitive personal health data tied to an account. A few things
 this build already does because of that, worth keeping in mind as you extend
 it:
-- Both Supabase tables have RLS policies scoping every row to its owner —
-  don't add a table without one.
+- All three Supabase tables (including `daily_logs`, which holds
+  temperature, symptoms, intimacy, and freeform notes — the most sensitive
+  data in the app) have RLS policies scoping every row to its owner — don't
+  add a table without one.
 - No analytics/tracking SDKs are wired in. If you ever add one, keep cycle
   data out of anything sent to it.
 - The suggestion content carries a permanent non-medical-advice disclaimer

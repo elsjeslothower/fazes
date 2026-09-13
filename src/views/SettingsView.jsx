@@ -3,16 +3,18 @@ import { useSession } from '../state/session.js';
 import { useCycleStore, saveSettings } from '../state/cycleStore.js';
 import { signOut } from '../auth/auth.js';
 import { DISCLAIMER } from '../content/phaseContent.js';
+import { LoadingIndicator } from '../components/LoadingIndicator.jsx';
 
 export function SettingsView() {
   const { session } = useSession();
   const { profile, loading } = useCycleStore();
   const [avgCycleLength, setAvgCycleLength] = useState(profile?.avgCycleLength ?? 28);
   const [avgPeriodLength, setAvgPeriodLength] = useState(profile?.avgPeriodLength ?? 5);
+  const [temperatureUnit, setTemperatureUnit] = useState(profile?.temperatureUnit ?? 'fahrenheit');
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  if (loading) return <p class="loading">Loading…</p>;
+  if (loading) return <LoadingIndicator />;
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -22,6 +24,7 @@ export function SettingsView() {
       await saveSettings(session.user.id, {
         avgCycleLength: Number(avgCycleLength),
         avgPeriodLength: Number(avgPeriodLength),
+        temperatureUnit,
       });
       setSaved(true);
     } finally {
@@ -55,6 +58,14 @@ export function SettingsView() {
           />
         </label>
         <p class="hint">These refine automatically once you've logged a couple of cycles.</p>
+
+        <label>
+          Temperature unit
+          <select value={temperatureUnit} onChange={(e) => setTemperatureUnit(e.currentTarget.value)}>
+            <option value="fahrenheit">Fahrenheit (°F)</option>
+            <option value="celsius">Celsius (°C)</option>
+          </select>
+        </label>
 
         <button type="submit" class="primary-button" disabled={busy}>
           Save

@@ -1,8 +1,14 @@
 import { supabase } from '../auth/supabaseClient.js';
 import { DEFAULT_SETTINGS } from '../cycle/phaseEngine.js';
 
+const PROFILE_COLUMNS = 'avg_cycle_length, avg_period_length, temperature_unit';
+
 function fromRow(row) {
-  return { avgCycleLength: row.avg_cycle_length, avgPeriodLength: row.avg_period_length };
+  return {
+    avgCycleLength: row.avg_cycle_length,
+    avgPeriodLength: row.avg_period_length,
+    temperatureUnit: row.temperature_unit,
+  };
 }
 
 // Profiles are upserted lazily on first access rather than via a DB trigger —
@@ -10,7 +16,7 @@ function fromRow(row) {
 export async function getOrCreateProfile(userId) {
   const { data, error } = await supabase
     .from('profiles')
-    .select('avg_cycle_length, avg_period_length')
+    .select(PROFILE_COLUMNS)
     .eq('id', userId)
     .maybeSingle();
 
@@ -24,23 +30,24 @@ export async function getOrCreateProfile(userId) {
       avg_cycle_length: DEFAULT_SETTINGS.avgCycleLength,
       avg_period_length: DEFAULT_SETTINGS.avgPeriodLength,
     })
-    .select('avg_cycle_length, avg_period_length')
+    .select(PROFILE_COLUMNS)
     .single();
 
   if (insertError) throw insertError;
   return fromRow(created);
 }
 
-export async function updateProfile(userId, { avgCycleLength, avgPeriodLength }) {
+export async function updateProfile(userId, { avgCycleLength, avgPeriodLength, temperatureUnit }) {
   const { data, error } = await supabase
     .from('profiles')
     .update({
       avg_cycle_length: avgCycleLength,
       avg_period_length: avgPeriodLength,
+      temperature_unit: temperatureUnit,
       updated_at: new Date().toISOString(),
     })
     .eq('id', userId)
-    .select('avg_cycle_length, avg_period_length')
+    .select(PROFILE_COLUMNS)
     .single();
 
   if (error) throw error;

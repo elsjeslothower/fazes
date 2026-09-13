@@ -26,6 +26,19 @@ export function formatDateOnly(date) {
   return date.toISOString().slice(0, 10);
 }
 
+// Inclusive list of 'YYYY-MM-DD' strings from startDateString to
+// endDateString — used to enumerate a cycle's days for the daily-log view.
+export function datesInRange(startDateString, endDateString) {
+  const start = parseDateOnly(startDateString);
+  const end = parseDateOnly(endDateString);
+  const dates = [];
+
+  for (let d = start; d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+    dates.push(formatDateOnly(d));
+  }
+  return dates;
+}
+
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }

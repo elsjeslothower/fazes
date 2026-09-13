@@ -302,6 +302,9 @@ h1, h2, h3 {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 0.75rem 0.9rem;
+}
+
+.cycle-list-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -344,6 +347,92 @@ h1, h2, h3 {
   border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--bg);
+  color: var(--fg);
+}
+
+/* Per-day logs, nested inside an expanded cycle */
+.day-log-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0.75rem 0 0;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.day-log-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.day-log-row:hover {
+  background: var(--bg);
+}
+
+.day-log-summary {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.day-log-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.5rem;
+}
+
+.day-log-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.day-log-form input[type="number"],
+.day-log-form textarea {
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+}
+
+.symptom-grid {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem 0.75rem;
+}
+
+.symptom-grid legend {
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding: 0;
+  margin-bottom: 0.25rem;
+  grid-column: 1 / -1;
+}
+
+.day-log-form .symptom-option,
+.day-log-form .intimacy-toggle {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
   color: var(--fg);
 }
 

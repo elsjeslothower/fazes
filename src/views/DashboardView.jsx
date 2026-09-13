@@ -4,6 +4,7 @@ import { useSession } from '../state/session.js';
 import { PHASE_CONTENT, DISCLAIMER } from '../content/phaseContent.js';
 import { PhaseBadge } from '../components/PhaseBadge.jsx';
 import { PhaseProgressBar } from '../components/PhaseProgressBar.jsx';
+import { LoadingIndicator } from '../components/LoadingIndicator.jsx';
 import { navigate } from '../router.js';
 
 export function DashboardView() {
@@ -16,7 +17,7 @@ export function DashboardView() {
     if (status && !status.hasData) navigate('/onboarding');
   }, [status?.hasData]);
 
-  if (loading) return <p class="loading">Loading…</p>;
+  if (loading) return <LoadingIndicator />;
   if (!status.hasData) return null;
 
   const activeCycle = cycles[0]?.endDate ? null : cycles[0];
